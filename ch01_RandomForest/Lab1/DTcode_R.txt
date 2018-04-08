@@ -1,0 +1,29 @@
+#### Decision tree code using rpart package by djcho
+
+install.packages("rpart") # install ¡°rpart¡± package
+install.packages(¡°caret¡±) # install ¡°caret¡± package
+library(rpart)
+library(caret)
+
+cali=read.csv("cali.csv") # read the ¡°cali.csv¡± file
+vali=read.csv("vali.csv") # read the ¡°vali.csv¡± file
+
+names(cali) # check the variables
+dim(cali) # check the dimension of calibration set
+dim(vali) # check the dimension of validation set
+
+# rpartmod<-rpart(num~. , data=cali, method="class") # example of general format not using detail control
+rpartmod<-rpart(num~. , data=cali, method="class", parms=list(split="information"), minsplit=20, minbucket=5, cp=0.001) # example of format using detail control
+plot(rpartmod) 
+text(rpartmod, cex=0.7)
+printcp(rpartmod) # display the results as table
+plotcp(rpartmod) # display the cross-validation results
+
+## pruning ##
+ptree<-prune(rpartmod, cp=0.0016)
+plot(ptree)
+text(ptree, cex=0.7)
+rpartpred<-predict(ptree, vali, type='class')
+
+confusionMatrix(rpartpred, vali$num) # Calculate the accuracy of the model
+
